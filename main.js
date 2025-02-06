@@ -117,19 +117,19 @@ function addObjects() {
     loadWalls();
 
     // Light
-    // const color = 0xFFFFFF;
-    // const intensity = 1;
-    // const light = new THREE.AmbientLight( color, intensity );
-    // scene.add( light );
+    const color = 0xFFFFFF;
+    const intensity = 1;
+    const light = new THREE.AmbientLight( color, intensity );
+    scene.add( light );
 
     // Directional Light
-    const color2 = 0xFFFFFF;
-    const intensity2 = 1;
-    const light2 = new THREE.DirectionalLight(color2, intensity2);
-    light2.position.set(5, 10, 5);
-    light2.target.position.set(-5, 0, -10);
-    scene.add(light2);
-    scene.add(light2.target);
+    // const color2 = 0xFFFFFF;
+    // const intensity2 = 1;
+    // const light2 = new THREE.DirectionalLight(color2, intensity2);
+    // light2.position.set(5, 10, 5);
+    // light2.target.position.set(-5, 0, -10);
+    // scene.add(light2);
+    // scene.add(light2.target);
 
     // Billboard
     const billboard = new THREE.PlaneGeometry( 2, .8 );
