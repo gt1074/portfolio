@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+import {UniformsUtils as singleGeometry} from "three";
 
 document.addEventListener("DOMContentLoaded", () => {
     main();
@@ -11,6 +12,7 @@ let loadingManager = new THREE.LoadingManager();
 loadingManager.onLoad = function () {
     console.log("All assets loaded!");
     document.getElementById('loading-screen').style.display = 'none';
+    assets_loaded = true;
 };
 
 let scene, camera, renderer, controls;
@@ -19,6 +21,8 @@ let modelGroup = new THREE.Group();
 
 let meshy, line;
 
+let assets_loaded = false;
+let outlineMesh;
 let lineGeo;
 
 let isDragging = false;
@@ -79,13 +83,28 @@ function addObjects() {
     const loader2 = new GLTFLoader(loadingManager);
 
     loader2.load( 'resources/fender_electric_guitar_gltf/scene.gltf', function ( gltf ) {
-        modelGroup = gltf.scene
+        modelGroup = gltf.scene;
         modelGroup.scale.set(5, 5, 5);
         modelGroup.position.set(0, 5, 0);
         modelGroup.rotation.set(Math.PI / 2, 0, 0);
-        modelGroup.name="guitar";
+        modelGroup.name = "guitar";
+
+        // Clone the model and scale it slightly to create an outline
+        outlineMesh = modelGroup.clone();
+        outlineMesh.traverse((child) => {
+            if (child.isMesh) {
+                child.material = new THREE.MeshBasicMaterial({ color: "FFFFFF", side: THREE.BackSide });
+            }
+        });
+
+        // Scale outline slightly larger
+        outlineMesh.scale.multiplyScalar(1.2);
+        scene.add(outlineMesh);
         scene.add(modelGroup);
-        console.log("added successfully");
+
+        outlineMesh.visible = false;
+
+        console.log("Added successfully");
     }, undefined, function ( error ) {
         console.error( error );
     } );
@@ -123,13 +142,13 @@ function addObjects() {
     scene.add( light );
 
     // Directional Light
-    // const color2 = 0xFFFFFF;
-    // const intensity2 = 1;
-    // const light2 = new THREE.DirectionalLight(color2, intensity2);
-    // light2.position.set(5, 10, 5);
-    // light2.target.position.set(-5, 0, -10);
-    // scene.add(light2);
-    // scene.add(light2.target);
+    const color2 = 0xFFFFFF;
+    const intensity2 = 1;
+    const light2 = new THREE.DirectionalLight(color2, intensity2);
+    light2.position.set(2, 0, 20);
+    light2.target.position.set(-2, 10, -10);
+    scene.add(light2);
+    scene.add(light2.target);
 
     // Billboard
     const billboard = new THREE.PlaneGeometry( 2, .8 );
@@ -144,7 +163,7 @@ function addObjects() {
     // Line
     const lineMat = new THREE.LineBasicMaterial( { color: 'black' } );
     const vertices = new Float32Array([
-        0, 5, 0,
+        0, 4, 0,
         10, 10, 10
     ]);
 
@@ -179,9 +198,23 @@ function onMouseMove(event) {
     const dx = event.clientX - mouseDownPosition.x;
     const dy = event.clientY - mouseDownPosition.y;
 
-    if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
-        isDragging = true;  // Mark as dragging
-    }
+    // Track hover
+    // if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
+    //     isDragging = true;  // Mark as dragging
+    //     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    //     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+    //
+    //     // Update the raycaster
+    //     raycaster.setFromCamera(mouse, camera);
+    //
+    //     // Get the list of objects intersected by the ray
+    //     if (assets_loaded) {
+    //         const intersects = raycaster.intersectObjects(modelGroup.children, true);
+    //         outlineMesh.visible = intersects.length > 0;
+    //     }
+    // }
+
+
 }
 
 function onMouseUp(event) {
@@ -228,9 +261,9 @@ function animate(offset) {
 
     controls.update();// Update controls (important for OrbitControls)
 
-
-
     if (meshy.visible) {
+        console.log(camera.position);
+        console.log(outlineMesh.position);
         const cameraDirection = new THREE.Vector3(0, 0, -1);
         camera.getWorldDirection(cameraDirection);
 
@@ -242,10 +275,19 @@ function animate(offset) {
         camera.getWorldDirection(cameraUp);
 
         meshy.position.copy(camera.position).addScaledVector(cameraDirection, 5).addScaledVector(cameraRight, 2).addScaledVector(cameraUp, 1);
+        outlineMesh.position.set(0, 0, 0);
+
+        const x = camera.position.x;
+        const y = camera.position.y;
+        const z = camera.position.z;
+
+        outlineMesh.position.set((((-x) * .3) - .5), (((-y) * .2) + 6), (-z) * .3);
 
         meshy.lookAt(camera.position);
         updateLine();
     }
+
+
 
     renderer.render(scene, camera);
 }
@@ -256,8 +298,6 @@ function main() {
     init();
 
     addObjects();
-
-
 
     function resizeRendererToDisplaySize( renderer ) {
         const canvas = renderer.domElement;
