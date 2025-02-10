@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {UniformsUtils as singleGeometry} from "three";
+import {DRACOLoader} from "three/addons/loaders/DRACOLoader.js";
 
 document.addEventListener("DOMContentLoaded", () => {
     main();
@@ -29,11 +29,9 @@ let isDragging = false;
 let mouseDownPosition = new THREE.Vector2();
 const dragThreshold = 5;
 
-const selectedObjects = [];
-
 function init() {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color( 'black' );
+    scene.background = new THREE.Color( '#F2E9DC' );
 
     const canvas = document.querySelector( '#c' );
     renderer = new THREE.WebGLRenderer( { antialias: true, canvas } );
@@ -59,30 +57,15 @@ function init() {
 }
 
 function addObjects() {
-    const planeWidth = 20;
-    const planeHeight = 15;
-
-    const loader1 = new THREE.TextureLoader();
-    const texture = loader1.load( 'resources/checker.png' );
-    texture.wrapS = THREE.RepeatWrapping;
-    texture.wrapT = THREE.RepeatWrapping;
-    texture.magFilter = THREE.NearestFilter;
-    texture.colorSpace = THREE.SRGBColorSpace;
-    const repeats = planeWidth / 2;
-    texture.repeat.set( repeats, repeats );
-
-    const planeGeo = new THREE.PlaneGeometry( planeWidth, planeHeight );
-    const planeMat = new THREE.MeshPhongMaterial( {
-        map: texture,
-        side: THREE.DoubleSide,
-    } );
-    const mesh = new THREE.Mesh( planeGeo, planeMat );
-    mesh.rotation.x = Math.PI * - .5;
-    scene.add( mesh );
 
     const loader2 = new GLTFLoader(loadingManager);
 
-    loader2.load( 'resources/fender_electric_guitar_gltf/scene.gltf', function ( gltf ) {
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+
+    loader2.setDRACOLoader(dracoLoader);
+
+    loader2.load( 'resources/fender_electric_guitar_gltf/scene-draco.gltf', function ( gltf ) {
         modelGroup = gltf.scene;
         modelGroup.scale.set(5, 5, 5);
         modelGroup.position.set(0, 5, 0);
@@ -93,7 +76,7 @@ function addObjects() {
         outlineMesh = modelGroup.clone();
         outlineMesh.traverse((child) => {
             if (child.isMesh) {
-                child.material = new THREE.MeshBasicMaterial({ color: "FFFFFF", side: THREE.BackSide });
+                child.material = new THREE.MeshBasicMaterial({ color: "#595959", side: THREE.BackSide });
             }
         });
 
@@ -102,38 +85,11 @@ function addObjects() {
         scene.add(outlineMesh);
         scene.add(modelGroup);
 
-        outlineMesh.visible = false;
-
         console.log("Added successfully");
     }, undefined, function ( error ) {
         console.error( error );
     } );
 
-    function loadWalls() {
-        const wallwidths = [20, 20, 15, 15];
-        const wallheight = 5;
-        const wallLocations = [[0, wallheight, -7.5], [0, wallheight, 7.5], [-10, wallheight, 0], [10, wallheight, 0]];
-        const wallRotations = [[0, 0, 0], [0, (Math.PI / 2) * 2, 0], [0, (Math.PI / 2), 0], [0, -(Math.PI / 2), 0]];
-        for (let i = 0; i < 4; i++) {
-            const width = wallwidths[i];
-            const height = 10;
-            const geometry = new THREE.PlaneGeometry( width, height );
-            const loader = new THREE.TextureLoader();
-            const texture = loader.load( 'resources/wall.jpg' );
-            texture.colorSpace = THREE.SRGBColorSpace;
-
-            const material = new THREE.MeshBasicMaterial({
-                map: texture
-            });
-            const mesh = new THREE.Mesh( geometry, material);
-            mesh.position.set( wallLocations[i][0], wallLocations[i][1], wallLocations[i][2]);
-            mesh.rotation.set(wallRotations[i][0], wallRotations[i][1], wallRotations[i][2]);
-            mesh.name = "wall:" + i;
-            scene.add(mesh);
-        }
-    }
-
-    loadWalls();
 
     // Light
     const color = 0xFFFFFF;
@@ -199,20 +155,9 @@ function onMouseMove(event) {
     const dy = event.clientY - mouseDownPosition.y;
 
     // Track hover
-    // if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
-    //     isDragging = true;  // Mark as dragging
-    //     mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-    //     mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-    //
-    //     // Update the raycaster
-    //     raycaster.setFromCamera(mouse, camera);
-    //
-    //     // Get the list of objects intersected by the ray
-    //     if (assets_loaded) {
-    //         const intersects = raycaster.intersectObjects(modelGroup.children, true);
-    //         outlineMesh.visible = intersects.length > 0;
-    //     }
-    // }
+    if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
+        isDragging = true;  // Mark as dragging
+    }
 
 
 }
@@ -241,9 +186,6 @@ function onMouseUp(event) {
             line.visible = !line.visible;
         } else if (guitarIntersects.length > 0) {
             window.location.href = "ChordSite/chordSite.html";
-        } else {
-            meshy.visible = false;
-            line.visible = false;
         }
 
         // Reactivate OrbitControls after selection
@@ -256,10 +198,21 @@ function onMouseUp(event) {
     isDragging = false;
 }
 
-function animate(offset) {
+function animate() {
     requestAnimationFrame(animate);
 
     controls.update();// Update controls (important for OrbitControls)
+
+    if (assets_loaded) {
+        outlineMesh.position.set(0, 0, 0);
+
+        const x = camera.position.x;
+        const y = camera.position.y;
+        const z = camera.position.z;
+
+        outlineMesh.position.set((((-x) * .3) - .5), (((-y) * .2) + 6), (-z) * .3);
+    }
+
 
     if (meshy.visible) {
         console.log(camera.position);
@@ -275,19 +228,10 @@ function animate(offset) {
         camera.getWorldDirection(cameraUp);
 
         meshy.position.copy(camera.position).addScaledVector(cameraDirection, 5).addScaledVector(cameraRight, 2).addScaledVector(cameraUp, 1);
-        outlineMesh.position.set(0, 0, 0);
-
-        const x = camera.position.x;
-        const y = camera.position.y;
-        const z = camera.position.z;
-
-        outlineMesh.position.set((((-x) * .3) - .5), (((-y) * .2) + 6), (-z) * .3);
 
         meshy.lookAt(camera.position);
         updateLine();
     }
-
-
 
     renderer.render(scene, camera);
 }
@@ -299,17 +243,6 @@ function main() {
 
     addObjects();
 
-    function resizeRendererToDisplaySize( renderer ) {
-        const canvas = renderer.domElement;
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
-        const needResize = canvas.width !== width || canvas.height !== height;
-        if ( needResize ) {
-            renderer.setSize( width, height, false );
-        }
-        return needResize;
-    }
-
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
         camera.updateProjectionMatrix();
@@ -320,8 +253,6 @@ function main() {
     window.addEventListener('mousemove', onMouseMove, false);
     window.addEventListener('mouseup', onMouseUp, false);
 
-    const offset = new THREE.Vector3(0, 0, -5);
-
-    animate(offset);
+    animate();
 }
 
