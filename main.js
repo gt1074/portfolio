@@ -185,7 +185,7 @@ function onMouseUp(event) {
             meshy.visible = !meshy.visible;
             line.visible = !line.visible;
         } else if (guitarIntersects.length > 0) {
-            window.location.href = "ChordSite/chordSite.html";
+            window.location.href = "chordSite.html";
         }
 
         // Reactivate OrbitControls after selection

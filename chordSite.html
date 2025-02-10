@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChordSite</title>
+</head>
+<body>
+    <div>
+        <h1>Chord Site!</h1>
+        <a href="index.html">Return to homepage</a>
+        <h3>Description</h3>
+        <p>Press the button below to generate a random chord using basic chord shapes!</p>
+    </div>
+    <div id="main">
+        <div>
+            <button id="randomButton">Get a Chord!</button>
+            <button id="hideButton">Reveal Chord!</button>
+        </div>
+        <h2 id="chordName"></h2>
+        <img src="" alt="Current Chord" id="chordImageE" height="170dpi" width="150dpi">
+        <img src="" alt="ewfwefw" id="chordImageA" height="170dpi" width="150dpi">
+
+
+    </div>
+</body>
+
+<script>
+    const roots = ["A", "A#", "B", "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#"];
+
+    const shapes = ["", "min", "7", "m7", "maj7"];
+
+    const imagesE = ["sources/EMajor.png", "sources/EMinor.png", "sources/E7th.png", "sources/EMinor7th.png", "sources/EMajor7th.png"];
+    const imagesA = ["sources/AMajor.png", "sources/AMinor.png", "sources/A7th.png", "sources/AMinor7th.png", "sources/AMajor7th.png"];
+
+    const imageE = document.getElementById("chordImageE");
+    const imageA = document.getElementById("chordImageA");
+    const chordName = document.getElementById("chordName");
+
+    imageA.hidden = true;
+    imageE.hidden = true;
+
+
+    const button = document.getElementById("randomButton");
+    const button2 = document.getElementById("hideButton");
+
+    button2.addEventListener("click", function () {
+        if (imageA.hidden === true) {
+            imageA.hidden = false;
+            imageE.hidden = false;
+        } else {
+            imageA.hidden = true;
+            imageE.hidden = true;
+        }
+    })
+
+    function getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+    }
+
+
+    button.addEventListener("click", function() {
+        let root_index = getRandomInt(roots.length);
+        let shapes_index = getRandomInt(shapes.length);
+
+        imageA.hidden = true;
+        imageE.hidden = true;
+
+        imageE.src = imagesE[shapes_index];
+        imageA.src = imagesA[shapes_index];
+
+        chordName.textContent = roots[root_index] + shapes[shapes_index];
+    })
+
+</script>
+</html>
