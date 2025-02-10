@@ -9,9 +9,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
 let loadingManager = new THREE.LoadingManager();
 
+const loadingBar = document.getElementById("loading-bar");
+const loadingText = document.getElementById("loading-text");
+const loadingContainer = document.getElementById("loading-container");
+
+loadingManager.onProgress = function (url, loaded, total) {
+    let progress = (loaded / total) * 100;
+    loadingBar.style.width = progress + "%";
+    loadingText.textContent = Math.round(progress) + "%";
+};
+
 loadingManager.onLoad = function () {
     console.log("All assets loaded!");
-    document.getElementById('loading-screen').style.display = 'none';
+    loadingContainer.style.display = "none";
     assets_loaded = true;
 };
 
@@ -186,6 +196,9 @@ function onMouseUp(event) {
             line.visible = !line.visible;
         } else if (guitarIntersects.length > 0) {
             window.location.href = "chordSite.html";
+        } else {
+            meshy.visible = false;
+            line.visible = false;
         }
 
         // Reactivate OrbitControls after selection
