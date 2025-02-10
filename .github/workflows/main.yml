@@ -18,4 +18,4 @@ jobs:
         aws-region: us-east-2
     
     - name: Sync to S3
-      run: aws s3 sync . s3://YOUR_BUCKET_NAME --exclude ".git*"
+      run: aws s3 sync . s3://tucker-portfolio-bucket --exclude ".git*"
