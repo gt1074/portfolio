@@ -61,8 +61,17 @@
     <div id="loading-container">
         <div id="loading-bar"></div>
         <span id="loading-text">0%</span>
+        <div id="initial-text">Loading Resources From S3</div>
     </div>
     <canvas id="c"></canvas>
     <script type="module" src="main.js"></script>
 </body>
+<script>
+    window.onload = function () {
+        document.getElementById("loading-bar").hidden = true;
+        document.getElementById("loading-text").hidden = true;
+
+    }
+
+</script>
 </html>
