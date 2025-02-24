@@ -12,8 +12,13 @@ let loadingManager = new THREE.LoadingManager();
 const loadingBar = document.getElementById("loading-bar");
 const loadingText = document.getElementById("loading-text");
 const loadingContainer = document.getElementById("loading-container");
+const initialText = document.getElementById("initial-text");
 
 loadingManager.onProgress = function (url, loaded, total) {
+    initialText.hidden = true;
+    loadingBar.hidden = false;
+    loadingText.hidden = false;
+
     let progress = (loaded / total) * 100;
     loadingBar.style.width = progress + "%";
     loadingText.textContent = Math.round(progress) + "%";
