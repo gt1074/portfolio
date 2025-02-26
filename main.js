@@ -80,7 +80,7 @@ function addObjects() {
 
     loader2.setDRACOLoader(dracoLoader);
 
-    loader2.load( 'resources/fender_electric_guitar_gltf/scene-draco.gltf', function ( gltf ) {
+    loader2.load( './resources/fender_electric_guitar_gltf/scene-draco.gltf', function ( gltf ) {
         modelGroup = gltf.scene;
         modelGroup.scale.set(5, 5, 5);
         modelGroup.position.set(0, 5, 0);
