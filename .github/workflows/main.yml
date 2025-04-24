@@ -17,9 +17,11 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-2
 
+    - name: Install Dependencies
+      run: npm install
+    
     - name: Build the Vite Dist
       run: npm run build
     
     - name: Sync to S3
       run: aws s3 sync ./dist s3://tucker-portfolio-bucket --delete
-           
