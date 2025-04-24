@@ -20,8 +20,8 @@ jobs:
     - name: Install Dependencies
       run: npm install
     
-    - name: Build the Vite Dist
-      run: npm run build
+    - name: Webpack the Modules
+      run: npm run pack
     
     - name: Sync to S3
-      run: aws s3 sync ./dist s3://tucker-portfolio-bucket --delete
+      run: aws s3 sync . s3://tucker-portfolio-bucket --delete
