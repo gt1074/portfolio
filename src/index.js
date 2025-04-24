@@ -44,7 +44,7 @@ loadingManager.onLoad = function () {
 
 const loadModel = async () => {
     const controller = new AbortController();
-    const timeoutMs = 100;
+    const timeoutMs = 2000;
 
     const timeout = setTimeout(() => {
         controller.abort();
