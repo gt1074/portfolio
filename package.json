@@ -12,17 +12,20 @@
   },
   "license": "ISC",
   "author": "",
-  "type": "commonjs",
-  "main": "src/main.js",
+  "type": "module",
+  "main": "src/index.js",
   "dependencies": {
     "three": "^0.176.0"
   },
   "devDependencies": {
-    "vite": "^6.3.2"
+    "vite": "^6.3.2",
+    "webpack": "^5.99.6",
+    "webpack-cli": "^6.0.1"
   },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "pack": "webpack"
   }
 }
