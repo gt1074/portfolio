@@ -28,3 +28,6 @@ jobs:
     
     - name: Sync Dist Folder to S3
       run: aws s3 sync ./dist s3://tucker-portfolio-bucket/dist --delete
+
+    - name: Invalid Cache for Index
+      run: aws cloudfront create-invalidation --distribution-id E2FEOX49TU64QS --paths "/*"
