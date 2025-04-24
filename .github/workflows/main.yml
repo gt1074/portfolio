@@ -24,6 +24,8 @@ jobs:
       run: |
         aws s3 sync . s3://tucker-portfolio-bucket \
         --include "*" \
+        --exclude ".git/*" \
+        --exclude ".github/*" \
         --exclude "cloudFormationTemplate.yaml" \
         --exclude ".gitignore" \
         --exclude ".idea/*" \
