@@ -13,7 +13,7 @@ let guitarGroup = new THREE.Group();
 
 let assets_loaded = false;
 
-let chosen_URL = 0;
+
 const highQualityUrl = './resources/HighQuality/gibson_sg_guitar.glb';
 const lowQualityUrl = './resources/LowQuality/outputs/LowQualityGuitar.glb';
 
