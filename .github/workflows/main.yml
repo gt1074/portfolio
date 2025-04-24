@@ -24,7 +24,7 @@ jobs:
       run: npm run pack
     
     - name: Sync Public Folder to S3
-      run: aws s3 sync ./public s3://tucker-portfolio-bucket --delete
+      run: aws s3 sync ./public s3://tucker-portfolio-bucket/public --delete
     
     - name: Sync Dist Folder to S3
-      run: aws s3 sync ./dist s3://tucker-portfolio-bucket --delete
+      run: aws s3 sync ./dist s3://tucker-portfolio-bucket/dist --delete
