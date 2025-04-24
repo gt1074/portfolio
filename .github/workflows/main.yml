@@ -21,11 +21,12 @@ jobs:
       run: aws s3 rm s3://tucker-portfolio-bucket --recursive
     
     - name: Sync to S3
-      run: aws s3 sync ./favicon.png s3://tucker-portfolio-bucket & \
-           aws s3 sync ./index.html s3://tucker-portfolio-bucket & \
-           aws s3 sync ./main.js s3://tucker-portfolio-bucket & \
-           aws s3 sync ./main.ccc s3://tucker-portfolio-bucket & \
-           aws s3 sync ./resources s3://tucker-portfolio-bucket & \
-           aws s3 sync ./index.html s3://tucker-portfolio-bucket & \
-           aws s3 sync ./package-lock.json s3://tucker-portfolio-bucket & \
-           aws s3 sync ./package.json s3://tucker-portfolio-bucket 
+      run: aws s3 sync . s3://tucker-portfolio-bucket \
+        --include "*" \
+        --exclude "cloudFormationTemplate.yaml" \
+        --exclude ".gitignore" \
+        --exclude ".idea/*" \
+        --exclude "jsconfig.json" \
+        --exclude "configureCloud.py" \
+        --exclude "README.md" 
+           
