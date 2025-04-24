@@ -21,10 +21,10 @@ jobs:
       run: aws s3 rm s3://tucker-portfolio-bucket --recursive
     
     - name: Sync to S3
-      run: aws s3 sync . s3://tucker-portfolio-bucket --exclude ".github/*" \
-                                                      --exclude "cloudFormationTemplate.yaml" \
-                                                      --exclude ".gitignore" \
-                                                      --exclude ".idea/*" \
-                                                      --exclude "jsconfig.json" \
-                                                      --exclude "configureCloud.py" \
-                                                      --exclude "README.md"
+      run: aws s3 sync . s3://tucker-portfolio-bucket --exclude "./.github/*" \
+                                                      --exclude "./cloudFormationTemplate.yaml" \
+                                                      --exclude "./.gitignore" \
+                                                      --exclude "./.idea/*" \
+                                                      --exclude "./jsconfig.json" \
+                                                      --exclude "./configureCloud.py" \
+                                                      --exclude "./README.md"
