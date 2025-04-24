@@ -21,7 +21,8 @@ jobs:
       run: aws s3 rm s3://tucker-portfolio-bucket --recursive
     
     - name: Sync to S3
-      run: aws s3 sync . s3://tucker-portfolio-bucket \
+      run: |
+        aws s3 sync . s3://tucker-portfolio-bucket \
         --include "*" \
         --exclude "cloudFormationTemplate.yaml" \
         --exclude ".gitignore" \
