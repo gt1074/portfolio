@@ -29,7 +29,7 @@ jobs:
          --include "*" \
          --exclude ".git/*" \
          --exclude ".github/*" \
-         --exclude "cloud/*
+         --exclude "cloud/*" \
          --exclude ".gitignore" \
          --exclude ".idea/*" \
          --exclude "jsconfig.json"
