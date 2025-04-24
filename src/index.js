@@ -13,8 +13,8 @@ let guitarGroup = new THREE.Group();
 let assets_loaded = false;
 
 
-const highQualityUrl = 'https://d30iaq9iwb0kwc.cloudfront.net/resources/HighQuality/gibson_sg_guitar.glb';
-const lowQualityUrl = 'https://d30iaq9iwb0kwc.cloudfront.net/resources/LowQuality/outputs/LowQualityGuitar.glb';
+const highQualityUrl = 'https://d30iaq9iwb0kwc.cloudfront.net/public/resources/HighQuality/gibson_sg_guitar.glb';
+const lowQualityUrl = 'https://d30iaq9iwb0kwc.cloudfront.net/public/resources/LowQuality/outputs/LowQualityGuitar.glb';
 
 document.addEventListener("DOMContentLoaded", () => {
     index();
