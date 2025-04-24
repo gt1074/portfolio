@@ -1,0 +1,26 @@
+{
+  "name": "threejstest",
+  "version": "1.0.0",
+  "description": "Gavin Tucker Portfolio",
+  "homepage": "https://github.com/gt1074/portfolio#readme",
+  "bugs": {
+    "url": "https://github.com/gt1074/portfolio/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gt1074/portfolio.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "three": "^0.176.0"
+  },
+  "devDependencies": {
+    "vite": "^6.3.2"
+  }
+}

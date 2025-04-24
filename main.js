@@ -1,11 +1,5 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
-import {DRACOLoader} from "three/addons/loaders/DRACOLoader.js";
-
-document.addEventListener("DOMContentLoaded", () => {
-    main();
-});
+import {GLTFLoader} from "three/addons";
 
 let loadingManager = new THREE.LoadingManager();
 
@@ -13,6 +7,25 @@ const loadingBar = document.getElementById("loading-bar");
 const loadingText = document.getElementById("loading-text");
 const loadingContainer = document.getElementById("loading-container");
 const initialText = document.getElementById("initial-text");
+
+let scene, camera, renderer;
+let guitarGroup = new THREE.Group();
+
+let assets_loaded = false;
+
+let chosen_URL = 0;
+const highQualityUrl = './resources/HighQuality/gibson_sg_guitar.glb';
+const lowQualityUrl = './resources/LowQuality/outputs/LowQualityGuitar.glb';
+
+document.addEventListener("DOMContentLoaded", () => {
+    main();
+});
+
+window.onload = function() {
+    document.getElementById("loading-bar").hidden = true;
+    document.getElementById("loading-text").hidden = true;
+}
+
 
 loadingManager.onProgress = function (url, loaded, total) {
     initialText.hidden = true;
@@ -30,19 +43,68 @@ loadingManager.onLoad = function () {
     assets_loaded = true;
 };
 
-let scene, camera, renderer, controls;
-let raycaster, mouse;
-let modelGroup = new THREE.Group();
+const loadModel = async () => {
+    const controller = new AbortController();
+    const timeoutMs = 100;  // Set your max wait time (2 seconds)
 
-let meshy, line;
+    const timeout = setTimeout(() => {
+        controller.abort();
+    }, timeoutMs);
 
-let assets_loaded = false;
-let outlineMesh;
-let lineGeo;
+    const t0 = performance.now();
+    let modelUsed = 'modelA.glb';
 
-let isDragging = false;
-let mouseDownPosition = new THREE.Vector2();
-const dragThreshold = 5;
+    try {
+        const response = await fetch(highQualityUrl, { signal: controller.signal });
+        const blob = await response.blob();
+        const t1 = performance.now();
+        clearTimeout(timeout);
+
+        console.log(`High quality model loaded in ${(t1 - t0).toFixed(2)} ms`);
+
+        loadIntoThreeJS(blob, 0);
+
+    } catch (err) {
+        console.warn('High quality load failed or timed out. Loading fallback.');
+
+        const t2 = performance.now();
+
+        const lowQualityResponse = await fetch(lowQualityUrl);
+        const lowQualityBlob = await lowQualityResponse.blob();
+        const t3 = performance.now();
+
+        console.log(`Low quality model loaded in ${(t3 - t2).toFixed(2)} ms`);
+        loadIntoThreeJS(lowQualityBlob, 1);
+
+    }
+}
+
+function loadIntoThreeJS(blob, modelType) {
+    const url = URL.createObjectURL(blob);
+    const loader = new GLTFLoader(loadingManager);
+    loader.load(url, function (gltf) {
+        if (modelType === 0) {
+            guitarGroup = gltf.scene;
+            guitarGroup.scale.set(15, 15, 15);
+            guitarGroup.position.set(0, 1, 0);
+            guitarGroup.name = "guitar";
+
+            scene.add(guitarGroup);
+
+            console.log("Added successfully");
+        } else {
+            guitarGroup = gltf.scene;
+            guitarGroup.scale.set(2.5, 2.5, 2.5);
+            guitarGroup.name = "guitar";
+
+            scene.add(guitarGroup);
+
+            console.log("Added successfully");
+        }
+    }, undefined, function ( error ) {
+        console.error( error );
+    });
+}
 
 function init() {
     scene = new THREE.Scene();
@@ -59,53 +121,6 @@ function init() {
     camera = new THREE.PerspectiveCamera( fov, aspect, near, far );
     camera.position.set( 0, 5, 20 );
 
-
-    controls = new OrbitControls( camera, renderer.domElement);
-    controls.target.set( 0, 5, 0 );
-    controls.enableZoom = true;  // Allow zooming
-    controls.enablePan = true;   // Allow panning
-    controls.enableRotate = true;
-
-    raycaster = new THREE.Raycaster();
-    mouse = new THREE.Vector2();
-
-}
-
-function addObjects() {
-
-    const loader2 = new GLTFLoader(loadingManager);
-
-    const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
-
-    loader2.setDRACOLoader(dracoLoader);
-
-    loader2.load( './resources/fender_electric_guitar_gltf/scene-draco.gltf', function ( gltf ) {
-        modelGroup = gltf.scene;
-        modelGroup.scale.set(5, 5, 5);
-        modelGroup.position.set(0, 5, 0);
-        modelGroup.rotation.set(Math.PI / 2, 0, 0);
-        modelGroup.name = "guitar";
-
-        // Clone the model and scale it slightly to create an outline
-        outlineMesh = modelGroup.clone();
-        outlineMesh.traverse((child) => {
-            if (child.isMesh) {
-                child.material = new THREE.MeshBasicMaterial({ color: "#595959", side: THREE.BackSide });
-            }
-        });
-
-        // Scale outline slightly larger
-        outlineMesh.scale.multiplyScalar(1.2);
-        scene.add(outlineMesh);
-        scene.add(modelGroup);
-
-        console.log("Added successfully");
-    }, undefined, function ( error ) {
-        console.error( error );
-    } );
-
-
     // Light
     const color = 0xFFFFFF;
     const intensity = 1;
@@ -120,146 +135,35 @@ function addObjects() {
     light2.target.position.set(-2, 10, -10);
     scene.add(light2);
     scene.add(light2.target);
-
-    // Billboard
-    const billboard = new THREE.PlaneGeometry( 2, .8 );
-    const loader = new THREE.TextureLoader();
-    const texture1 = loader.load( 'resources/guitarPopUp.png' );
-    texture1.colorSpace = THREE.SRGBColorSpace;
-    const mat = new THREE.MeshBasicMaterial({ map: texture1, side: THREE.DoubleSide });
-    meshy = new THREE.Mesh( billboard, mat);
-    meshy.visible = false;
-    scene.add(meshy);
-
-    // Line
-    const lineMat = new THREE.LineBasicMaterial( { color: 'black' } );
-    const vertices = new Float32Array([
-        0, 4, 0,
-        10, 10, 10
-    ]);
-
-    lineGeo = new THREE.BufferGeometry();
-    lineGeo.setAttribute('position', new THREE.BufferAttribute(vertices, 3))
-    line = new THREE.Line( lineGeo, lineMat);
-    line.visible = false;
-    scene.add( line );
 }
 
-function updateLine() {
-    const newX = meshy.position.x;
-    const newY = meshy.position.y;
-    const newZ = meshy.position.z;
+function addHighQuality() {
+    const loader = new GLTFLoader(loadingManager);
 
-    // Update the position of point 2 (index 3, 4, 5 for x, y, z)
-    lineGeo.attributes.position.setXYZ(1, newX, newY, newZ);
+    loader.load(highQualityUrl, function ( gltf ) {
 
-    // Indicate that the position attribute has changed
-    lineGeo.attributes.position.needsUpdate = true;
+    }, undefined, function ( error ) {
+        console.error( error );
+    } );
 }
 
+function addLowQuality() {
+    const loader = new GLTFLoader(loadingManager);
 
-function onMouseDown(event) {
-    // Store initial mouse position
-    mouseDownPosition.set(event.clientX, event.clientY);
-    isDragging = false;
-}
+    loader.load(lowQualityUrl, function ( gltf ) {
 
-function onMouseMove(event) {
-    // Check if the mouse has moved far enough to be considered a drag
-    const dx = event.clientX - mouseDownPosition.x;
-    const dy = event.clientY - mouseDownPosition.y;
-
-    // Track hover
-    if (Math.abs(dx) > dragThreshold || Math.abs(dy) > dragThreshold) {
-        isDragging = true;  // Mark as dragging
-    }
-
-
-}
-
-function onMouseUp(event) {
-
-    // Only trigger the click if it's not a drag
-    if (!isDragging) {
-        // Disable OrbitControls temporarily during click event
-        controls.enabled = false;
-
-        // Calculate mouse position in normalized device coordinates (-1 to +1)
-        mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-        mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-        // Update the raycaster
-        raycaster.setFromCamera(mouse, camera);
-
-        // Get the list of objects intersected by the ray
-        const intersects = raycaster.intersectObjects(modelGroup.children, true);
-        const guitarIntersects = raycaster.intersectObject(meshy, true);
-
-        // If there's an intersection, select the first object
-        if (intersects.length > 0) {
-            meshy.visible = !meshy.visible;
-            line.visible = !line.visible;
-        } else if (guitarIntersects.length > 0) {
-            window.location.href = "chordSite.html";
-        } else {
-            meshy.visible = false;
-            line.visible = false;
-        }
-
-        // Reactivate OrbitControls after selection
-        setTimeout(() => {
-            controls.enabled = true;
-        }, 100); // Delay reactivation to ensure click event is processed
-    }
-
-    // Reset drag state after mouse up
-    isDragging = false;
+    }, undefined, function ( error ) {
+        console.error( error );
+    } );
 }
 
 function animate() {
     requestAnimationFrame(animate);
-
-    controls.update();// Update controls (important for OrbitControls)
-
-    if (assets_loaded) {
-        outlineMesh.position.set(0, 0, 0);
-
-        const x = camera.position.x;
-        const y = camera.position.y;
-        const z = camera.position.z;
-
-        outlineMesh.position.set((((-x) * .3) - .5), (((-y) * .2) + 6), (-z) * .3);
-    }
-
-
-    if (meshy.visible) {
-        console.log(camera.position);
-        console.log(outlineMesh.position);
-        const cameraDirection = new THREE.Vector3(0, 0, -1);
-        camera.getWorldDirection(cameraDirection);
-
-        const cameraRight = new THREE.Vector3(1, 0, 0); // X-axis (right)
-        camera.getWorldDirection(cameraRight);
-        cameraRight.cross(camera.up);
-
-        const cameraUp = new THREE.Vector3(0, 1, 0);
-        camera.getWorldDirection(cameraUp);
-
-        meshy.position.copy(camera.position).addScaledVector(cameraDirection, 5).addScaledVector(cameraRight, 2).addScaledVector(cameraUp, 1);
-
-        meshy.lookAt(camera.position);
-        updateLine();
-    }
-
     renderer.render(scene, camera);
 }
 
-
-
-function main() {
+async function main() {
     init();
-
-    addObjects();
 
     window.addEventListener('resize', () => {
         camera.aspect = window.innerWidth / window.innerHeight;
@@ -267,9 +171,7 @@ function main() {
         renderer.setSize(window.innerWidth, window.innerHeight);
     });
 
-    window.addEventListener('mousedown', onMouseDown, false);
-    window.addEventListener('mousemove', onMouseMove, false);
-    window.addEventListener('mouseup', onMouseUp, false);
+    await loadModel();
 
     animate();
 }
