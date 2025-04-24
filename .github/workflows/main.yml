@@ -31,4 +31,4 @@ jobs:
          --exclude "cloud/*" \
          --exclude ".gitignore" \
          --exclude ".idea/*" \
-         --exclude "jsconfig.json"
+         --exclude "jsconfig.json" --delete
