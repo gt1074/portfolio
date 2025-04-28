@@ -1,6 +1,11 @@
 Gavin Tucker's Portfolio.
-[Lives here](http://tucker-portfolio-bucket.s3-website.us-east-2.amazonaws.com/).
+[Lives here](https://d30iaq9iwb0kwc.cloudfront.net/).
 
-Takes forever to load because it has to pull a god damn 68MB 3D model of a guitar into the browser from S3.
+Contains models that link to projects I have worked on.
+Currently not linked together.
 
-Due to Safari's CORS the website does not work for that browser.
+Github Actions:
+1. Correctly set up npm​
+2. Webpack the dependencies​
+3. Sync only the necessary folders to s3​
+4. Invalid CloudFront's cache so users always see up to date portfolio
