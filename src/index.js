@@ -1,5 +1,5 @@
 import * as THREE from "three";
-
+import { OrbitControls } from "three/addons/controls/OrbitControls.js"
 let loadingManager = new THREE.LoadingManager();
 
 const loadingBar = document.getElementById("loading-bar");
@@ -7,7 +7,7 @@ const loadingText = document.getElementById("loading-text");
 const loadingContainer = document.getElementById("loading-container");
 const initialText = document.getElementById("initial-text");
 
-let scene, camera, renderer;
+let scene, camera, renderer, controls;
 let guitarGroup = new THREE.Group();
 
 let assets_loaded = false;
@@ -134,10 +134,19 @@ function init() {
     light2.target.position.set(-2, 10, -10);
     scene.add(light2);
     scene.add(light2.target);
+
+    //Orbit Controls
+    controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set( 0, 5, 0 );
+    controls.enableZoom = true;
+    controls.enablePan = true;
+    controls.enableRotate = true;
 }
 
 function animate() {
     requestAnimationFrame(animate);
+
+    controls.update();
     renderer.render(scene, camera);
 }
 
