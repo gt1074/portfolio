@@ -1,5 +1,5 @@
 Gavin Tucker's Portfolio.
-[Lives here](https://d30iaq9iwb0kwc.cloudfront.net/).
+Normally [Lives here](https://d30iaq9iwb0kwc.cloudfront.net/), but is not currently up.
 
 Contains models that link to projects I have worked on.
 Currently not linked together.
